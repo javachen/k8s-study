@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nfs-web
+spec:
+  containers:
+    - name: web
+      image: nginx
+      imagePullPolicy: Never        #如果已经有镜像，就不需要再拉取镜像
+      ports:
+        - name: web
+          containerPort: 80
+          hostPort: 80        #将容器的80端口映射到宿主机的80端口
+      volumeMounts:
+        - name : nfs        #指定名称必须与下面一致
+          mountPath: "/usr/share/nginx/html"        #容器内的挂载点
+  volumes:
+    - name: nfs            #指定名称必须与上面一致
+      nfs:            #nfs存储
+        server: 192.168.66.50        #nfs服务器ip或是域名
+        path: "/test"                #nfs服务器共享的目录

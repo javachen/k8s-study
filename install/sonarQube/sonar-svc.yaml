@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonar
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      nodePort: 30001
+  selector:
+    app: sonar

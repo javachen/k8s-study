@@ -1,0 +1,23 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger
+spec:
+  strategy: production
+  ingress:
+    enabled: false
+  query:
+    replicas: 2
+  collector:
+    replicas: 3
+  agent:
+    strategy: DaemonSet
+  storage:
+    type: elasticsearch
+    dependencies:
+      enabled: false
+    options:
+      es:
+        server-urls: http://elasticsearch-master.logging:9200
+        index-prefix: tracing
+

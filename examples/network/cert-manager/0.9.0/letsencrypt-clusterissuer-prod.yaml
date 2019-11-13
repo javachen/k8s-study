@@ -1,0 +1,26 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: junecloud@163.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - selector:
+        dnsNames:
+        - wesine.com.cn
+        - kuard.wesine.com.cn  
+        - '*.wesine.com.cn'
+      dns01:
+        webhook:
+          groupName: acme.wesine.com.cn 
+          solverName: dnspod
+          config:
+            apiID: 123438 
+            apiTokenSecretRef:
+              key: api-token
+              name: dnspod-credentials
+

@@ -1,0 +1,13 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: wildcard-wesine-com-cn
+spec:
+  secretName: wildcard-wesine-com-cn
+  renewBefore: 240h
+  dnsNames:
+  - '*.wesine.com.cn'
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hostPath-volume
+spec: 
+  containers:
+  - image: busybox
+    name: busybox
+    args:
+    - /bin/sh
+    - -c
+    - echo "hello " > /data/hello ; sleep 30000
+    volumeMounts:
+    - mountPath: /data
+      name: hostPath-volume
+  volumes:
+  - name: hostPath-volume
+    hostPath: 
+      path: /data
+      type: Directory

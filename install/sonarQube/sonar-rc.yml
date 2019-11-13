@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+ name: sonar
+spec:
+ replicas: 1
+ selector:
+   app: sonar
+ template:
+   metadata:
+     labels:
+       app: sonar
+   spec:
+     containers:
+       - name: sonar
+         image: sonarqube:6.2
+         ports:
+         - containerPort: 9000
+         env:
+         - name: SONARQUBE_JDBC_USERNAME
+           value: sonar
+         - name: SONARQUBE_JDBC_PASSWORD
+           value: sonar
+         - name: SONARQUBE_JDBC_URL
+           value: "jdbc:mysql://mysql:3306/sonardb?useSSL=false&useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance"
+
