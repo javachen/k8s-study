@@ -1,0 +1,33 @@
+## Static configuration
+[global]
+  checkNewVersion = true
+  sendAnonymousUsage = false
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  
+  [entryPoints.traefik]
+    address = ":8080"  
+    
+[log]
+  level = "DEBUG"
+  filePath = "/data/logs/traefik.log"
+  format = "common"
+
+[accessLog]
+  filePath = "/data/logs/access.log"
+  format = "common"
+
+[api]
+  insecure = true
+  dashboard = true
+
+[ping]
+  
+[providers]
+  [providers.docker]
+    endpoint = "unix:///var/run/docker.sock"
+    defaultRule = "Host(`{{ normalize .Name }}.docker.localhost`)"
+    # 如果设置为 false, 则没有 traefik.enable=true 标签的容器将从生成的路由配置中忽略
+    exposedByDefault = false

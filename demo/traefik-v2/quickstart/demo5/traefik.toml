@@ -1,0 +1,55 @@
+## Static configuration
+[global]
+  checkNewVersion = true
+  sendAnonymousUsage = false
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+
+  [entryPoints.https]
+    address = ":443"
+  
+  [entryPoints.traefik]
+    address = ":8080"  
+    
+[log]
+  level = "DEBUG"
+  filePath = "/data/logs/traefik.log"
+  format = "common"
+
+[accessLog]
+  filePath = "/data/logs/access.log"
+  format = "common"
+
+[api]
+  insecure = false
+  dashboard = true
+
+[ping]
+  
+[providers]
+  [providers.file]
+    filename = "/etc/traefik/dynamic-conf.toml"
+    watch = true
+  
+  [providers.docker]
+    endpoint = "unix:///var/run/docker.sock"
+    defaultRule = "Host(`{{ normalize .Name }}.docker.localhost`)"
+    # 如果设置为 false, 则没有 traefik.enable=true 标签的容器将从生成的路由配置中忽略
+    exposedByDefault = false
+
+[metrics]
+  [metrics.prometheus]
+  
+[certificatesResolvers]
+  [certificatesResolvers.sample]
+    [certificatesResolvers.sample.acme]
+      email = "junecloud@163.com"
+      storage = "/etc/traefik/acme.json"
+      caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+      [certificatesResolvers.sample.acme.dnsChallenge]
+        provider = "dnspod"
+        delayBeforeCheck = 42
+        resolvers = ["sample"]
+        disablePropagationCheck = true

@@ -1,0 +1,7 @@
+bootstrap:
+  timeout: 600
+
+dashboard:
+  type: ingress
+  host: platform9.traefikee-demo.containous.cloud
+

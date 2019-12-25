@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-test
+  labels:
+    istio-injection: enabled
+---
+#######################################
+# echo istio not injected
+#######################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: istio-test
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: echo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: istio-test
+  labels:
+    app: echo
+spec:
+  selector:
+    matchLabels:
+      app: echo
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: echo
+      annotations:
+        sidecar.istio.io/inject: "false"  
+    spec:
+      containers:
+      - name: echo
+        image: gcr.mirrors.ustc.edu.cn/google-containers/echoserver:1.10
+        ports:
+        - containerPort: 8080
+          name: http
+---
+#######################################
+# echo istio injected
+#######################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-istio
+  namespace: istio-test
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: echo-istio
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-istio
+  namespace: istio-test
+  labels:
+    app: echo-istio
+spec:
+  selector:
+    matchLabels:
+      app: echo-istio
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: echo-istio
+    spec:
+      containers:
+      - name: echo
+        image: gcr.mirrors.ustc.edu.cn/google-containers/echoserver:1.10
+        ports:
+        - containerPort: 8080
+          name: http
+---
+#######################################
+# Ingress Nginx for echo
+#######################################
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: echo
+  namespace: istio-test
+spec:
+  rules:
+  - host: ingress-test.<your domain name>
+    http:
+      paths:
+      - path: /echo-istio/
+        backend:
+          serviceName: echo-istio
+          servicePort: http
+      - path: /echo/
+        backend:
+          serviceName: echo
+          servicePort: http
+---
+########################
+# echo behind istio gateway
+########################
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: istio-test
+  name: echo-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "istio-test.<your domain name>"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: istio-test
+  name: echo-virtual-service
+spec:
+  hosts:
+  - "istio-test.<your domain name>"
+  gateways:
+  - echo-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /echo-istio/
+    route:
+    - destination:
+        host: echo-istio
+  - match:
+    - uri:
+        prefix: /echo/
+    route:
+    - destination:
+        host: echo

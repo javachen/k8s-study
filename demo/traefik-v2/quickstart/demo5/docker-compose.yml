@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:latest
+    ports:
+      # The HTTP port
+      - "80:80"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    environment:
+      - DNSPOD_API_KEY="127880,6847f9a4cdba562f574fe55944f689e7"
+    networks:
+      - traefik  
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.toml:/etc/traefik/traefik.toml
+      - ./dynamic-conf.toml:/etc/traefik/dynamic-conf.toml
+      - ./acme.json:/etc/traefik/acme.json
+      - ./logs:/data/logs
+      - ./ssl:/etc/ssl
+  whoami:
+    image: containous/whoami
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.whoami.rule=Host(`whoami.javachen.xyz`)
+      - traefik.http.routers.whoami.entrypoints=http
+      - traefik.http.routers.whoami-https.rule=Host(`whoami.javachen.xyz`)
+      - traefik.http.routers.whoami-https.entrypoints=https
+      - traefik.http.routers.whoami-https.tls=true
+      - traefik.http.routers.whoami-https.tls.certresolver=sample
+      # http 重定向到 https
+      - traefik.http.routers.whoami.middlewares=whoami
+      - traefik.http.middlewares.whoami.redirectscheme.scheme=https
+      - traefik.http.middlewares.whoami.redirectscheme.port=443
+    networks:
+      - traefik  
+      
+networks:
+  traefik:
+    external: true
