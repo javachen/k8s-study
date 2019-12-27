@@ -1,6 +1,6 @@
 ## Dynamic configuration
 [http.routers.traefik-https]
-  rule = "Host(`traefik.space.xyz`)"
+  rule = "Host(`traefik.javachen.xyz`)"
   entryPoints = ["https"]
   service = "api@internal"
   middlewares = ["auth"]
